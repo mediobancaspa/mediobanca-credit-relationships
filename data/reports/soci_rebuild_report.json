@@ -1,0 +1,171 @@
+{
+  "edge_type": "Soci_entities",
+  "existing_edges_count": 1036,
+  "rebuilt_edges_count": 1813,
+  "exact_matches_on_existing": 1005,
+  "normalized_matches_on_existing": 0,
+  "reused_edge_ids": 1005,
+  "new_edge_ids": 808,
+  "unmatched_existing_edge_ids_count": 31,
+  "unmatched_existing_edge_ids_preview": [
+    "0368c477-887d-4a9c-a1d7-2c0bb4d89538",
+    "1529bb5c-42ff-4d8d-bd02-f9339104166b",
+    "18133755-f05c-47d8-9983-722ea0e8fb8d",
+    "1b4fe480-49dc-4f44-bfd3-59f52376e7b2",
+    "1eb93dd9-6be5-4292-baae-5c25169ae95b",
+    "24136a86-8251-425f-8b7f-da7b8930de2b",
+    "30c323d6-15f8-4a54-a45c-3f2c5d6ffde2",
+    "3d179a36-50d5-4a87-a9c4-a2b6bcea97c9",
+    "5f35b8ff-344b-4e78-9a4b-4f79f4d02f85",
+    "6b8fd11b-ff60-45f1-aaa0-e0e7fa4c372c",
+    "6cf23797-6e47-4b55-88bd-0288498a6a5d",
+    "7435f73a-4bf5-4f55-8bbf-2746bde85b7b",
+    "82578b01-99d3-4689-91b4-61a85da56faa",
+    "85dc4747-2f93-499e-a2b0-d62031b7295f",
+    "95af1273-1dae-411c-8c1e-40366a924134",
+    "9c91ab6e-dd9c-404f-a4c3-d19f1e9f66b4",
+    "a0ef832b-8564-4f26-98b9-9111d58b2c25",
+    "a1b44369-5bd6-4287-a295-3aea9207c386",
+    "b5e33e5e-d320-44ef-a92d-d5ee8b896b26",
+    "bbfc4898-040e-4b51-92a6-67f920910bc5",
+    "be73e9f6-28ac-4e43-bb1f-259e261c8db4",
+    "c26aa9d2-62bd-45e8-bf1d-a5575cf63c4c",
+    "c6b80e9c-bd48-4d3d-8d14-b3a68bb956c0",
+    "c8fe4afc-833c-4ebd-87d4-220caae166e9",
+    "c9e1509b-7661-4621-9061-17b16b048a99",
+    "d024362d-7e69-4a2a-8277-8539886a8daa",
+    "d0f8bf92-6494-4ea4-b7cb-e608f0d68cc3",
+    "e434afb8-3af2-424f-8d20-375fbd1c160c",
+    "e694114e-dafe-4337-b484-1db046ca330d",
+    "fe79e985-e792-4320-8553-05166e1e0ca0",
+    "ff60ff92-77f6-406f-a339-4d867aead5b4"
+  ],
+  "new_nodes_count": 2163,
+  "edges_total": 1813,
+  "total_weight_sum": 3176,
+  "total_docs_refs_sum": 3176,
+  "edges_with_docs": 1813,
+  "edges_without_docs": 0,
+  "top_20_edges_by_weight": [
+    {
+      "source": "Nazionale Cogne SpA",
+      "target": "Ministero delle Partecipazioni Statali",
+      "weight": 109,
+      "docs_count": 109
+    },
+    {
+      "source": "Loro & Parisini SpA",
+      "target": "Mediobanca - Banca di Credito Finanziario SpA",
+      "weight": 39,
+      "docs_count": 39
+    },
+    {
+      "source": "Loro & Parisini SpA",
+      "target": "Feltrinelli",
+      "weight": 38,
+      "docs_count": 38
+    },
+    {
+      "source": "Loro & Parisini SpA",
+      "target": "Loro",
+      "weight": 38,
+      "docs_count": 38
+    },
+    {
+      "source": "Italsider SpA",
+      "target": "Finsider - Società Finanziaria Siderurgica per Azioni",
+      "weight": 26,
+      "docs_count": 26
+    },
+    {
+      "source": "Breda Siderurgica SpA",
+      "target": "Finsider - Società Finanziaria Siderurgica per Azioni",
+      "weight": 21,
+      "docs_count": 21
+    },
+    {
+      "source": "ITALIMPIANTI - Società Italiana Impianti per Azioni",
+      "target": "Finmeccanica - Società Finanziaria Meccanica SpA",
+      "weight": 17,
+      "docs_count": 17
+    },
+    {
+      "source": "ITALIMPIANTI - Società Italiana Impianti per Azioni",
+      "target": "Finsider - Società Finanziaria Siderurgica per Azioni",
+      "weight": 17,
+      "docs_count": 17
+    },
+    {
+      "source": "ITALIMPIANTI - Società Italiana Impianti per Azioni",
+      "target": "IRI - Istituto per la Ricostruzione Industriale",
+      "weight": 17,
+      "docs_count": 17
+    },
+    {
+      "source": "Link Belt SpA",
+      "target": "FMC Corporation",
+      "weight": 16,
+      "docs_count": 16
+    },
+    {
+      "source": "Link Belt SpA",
+      "target": "Link Belt SA",
+      "weight": 16,
+      "docs_count": 16
+    },
+    {
+      "source": "Mezzera SpA",
+      "target": "Jucker",
+      "weight": 14,
+      "docs_count": 14
+    },
+    {
+      "source": "Morteo Soprefin SpA",
+      "target": "Finsider - Società Finanziaria Siderurgica per Azioni",
+      "weight": 13,
+      "docs_count": 13
+    },
+    {
+      "source": "Acciaieria e Tubificio di Brescia SpA",
+      "target": "Acciaierie e Ferriere Lombarde Falck SpA",
+      "weight": 12,
+      "docs_count": 12
+    },
+    {
+      "source": "Acciaieria e Tubificio di Brescia SpA",
+      "target": "Finsider - Società Finanziaria Siderurgica per Azioni",
+      "weight": 12,
+      "docs_count": 12
+    },
+    {
+      "source": "Honeywell Information System Italia SpA",
+      "target": "Honeywell International Systems Inc",
+      "weight": 12,
+      "docs_count": 12
+    },
+    {
+      "source": "Honeywell Information System Italia SpA",
+      "target": "Honeywell SpA",
+      "weight": 12,
+      "docs_count": 12
+    },
+    {
+      "source": "SINCAT - Società Industriale Catanese SpA",
+      "target": "Montecatini Edison SpA",
+      "weight": 11,
+      "docs_count": 11
+    },
+    {
+      "source": "Hudson Italiana SpA",
+      "target": "Costruzioni Meccaniche FBM SpA",
+      "weight": 10,
+      "docs_count": 10
+    },
+    {
+      "source": "Hudson Italiana SpA",
+      "target": "Mediobanca - Banca di Credito Finanziario SpA",
+      "weight": 10,
+      "docs_count": 10
+    }
+  ]
+}

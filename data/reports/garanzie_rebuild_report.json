@@ -1,0 +1,190 @@
+{
+  "edge_type": "Garanzie_entities",
+  "existing_edges_count": 4165,
+  "rebuilt_edges_count": 4125,
+  "exact_matches_on_existing": 3844,
+  "normalized_matches_on_existing": 0,
+  "reused_edge_ids": 3844,
+  "new_edge_ids": 281,
+  "unmatched_existing_edge_ids_count": 321,
+  "unmatched_existing_edge_ids_preview": [
+    "0163be19-743d-482e-87e7-7e93312a4375",
+    "017a0d48-29e1-43b9-80de-0560e3edaacb",
+    "025604c9-c56d-4a3b-9a00-15f3877e3fee",
+    "0385f982-4e00-4cbd-b9b7-58737771d04d",
+    "0410e881-736c-40f3-b3f6-2ee349677524",
+    "04aa5588-4b92-4ce9-988a-313603032036",
+    "077d1522-1a82-47c9-873c-01f0cb0fb8f2",
+    "08d56282-a55f-42a8-87b2-0f14cfd0711b",
+    "0915c0a2-96bf-4c76-8426-faaa295933ca",
+    "092c92ca-939a-449b-84de-9a7831266844",
+    "098de2ae-1a89-47b4-8c56-a76b3e28be18",
+    "0a097279-6697-48c6-83ab-db8815699cca",
+    "0c129843-3b9d-49d8-9ac9-45f6617ab38c",
+    "0c6314be-2006-4adf-b3b4-a856c0f0cf72",
+    "0d05482b-0bf6-4ae8-ac3d-43ab2d97f233",
+    "0d5513b8-7db1-41d3-9a40-e37b3315427e",
+    "0d6eda66-3215-40fa-9a33-74b9467eaf06",
+    "0ddb2bf9-9483-4612-b33e-e59cf8d6a915",
+    "0df27535-029d-499e-8eef-a3f983b80d8b",
+    "0f184541-5014-4d0a-9b47-762b27585b74",
+    "0fd19c77-9259-41a3-abae-434b028473a4",
+    "111a52c3-1de5-4046-8dcb-8e3c7d19f57a",
+    "11d58a6b-a583-48b7-af5f-7ef9600f8da2",
+    "132220d5-99d1-4be3-aa3d-e9c2e5f9d1d6",
+    "15eb53f2-a307-424f-aa13-e52842c3ed09",
+    "16901c67-7cd1-4ebe-8648-c7da8f76e5bc",
+    "16b2a9cc-644d-4d98-9906-bb8c0ce0487e",
+    "16c43938-9c9f-4e82-975a-3c56bc9dc731",
+    "16e7a858-34b6-4067-8ea7-bdefdfc50a29",
+    "18768cb2-cc48-4d6a-9581-afcd1d10b0d3",
+    "1a72606c-ed70-47ca-8498-a662efe01a53",
+    "1a765700-e496-4c3d-a7d4-0e779795203a",
+    "1aa46d3e-e997-438b-a96a-6f8c18f7bfa1",
+    "1c1dbda0-f73a-4098-88c4-081a006a0aaa",
+    "1df22ef4-b4af-481f-8cd7-80a3ff6d0e1c",
+    "2044c1ca-5085-4d0e-b953-33f3e758d4f6",
+    "20680ce3-5038-4a31-b3d2-b55c47cd2c11",
+    "217d0cc4-eb32-4b0c-933a-85cecfbb1c0d",
+    "21a0f30f-ea28-41e4-a036-de3f9fcfe6dd",
+    "2356e345-0c48-4a72-85aa-1468424f7303",
+    "2372df24-834a-4bde-a3d4-15aa1fbe8818",
+    "23e440f3-5726-40c8-8f27-d001699e684b",
+    "2467e62d-38e7-4823-8271-48bc9305f7bc",
+    "24b846a5-2dbd-47d9-afe5-d77bbdfce462",
+    "255f20b4-3426-4276-867f-80cf9a34ad5b",
+    "262b5fd3-9f80-46d2-b63e-b1a716186be6",
+    "26713d24-715f-4276-8143-aa2ea7ce9ce7",
+    "270bb146-9c81-43af-b049-136ada54998d",
+    "27ce9895-d091-4a3e-913c-5df1440adcd4",
+    "28030eb7-f087-4930-bc55-4e518ec134d6"
+  ],
+  "new_nodes_count": 4497,
+  "edges_total": 4125,
+  "total_weight_sum": 5464,
+  "total_docs_refs_sum": 5464,
+  "edges_with_docs": 4125,
+  "edges_without_docs": 0,
+  "top_20_edges_by_weight": [
+    {
+      "source": "Italsider SpA",
+      "target": "Banca Bulgara per il Commercio Estero",
+      "weight": 26,
+      "docs_count": 26
+    },
+    {
+      "source": "Breda Siderurgica SpA",
+      "target": "Banca Bulgara per il Commercio Estero",
+      "weight": 15,
+      "docs_count": 15
+    },
+    {
+      "source": "ITALIMPIANTI - Società Italiana Impianti per Azioni",
+      "target": "IRI - Istituto per la Ricostruzione Industriale",
+      "weight": 15,
+      "docs_count": 15
+    },
+    {
+      "source": "Società Napoletana Fabbrica Macchine Industriali SpA",
+      "target": "Finmeccanica - Società Finanziaria Meccanica SpA",
+      "weight": 15,
+      "docs_count": 15
+    },
+    {
+      "source": "FIAT SpA [2°]",
+      "target": "Banco Industrial de la Republica Argentina",
+      "weight": 14,
+      "docs_count": 14
+    },
+    {
+      "source": "Morteo Soprefin SpA",
+      "target": "Finsider - Società Finanziaria Siderurgica per Azioni",
+      "weight": 13,
+      "docs_count": 13
+    },
+    {
+      "source": "FIAT SpA [2°]",
+      "target": "Hungarian Foreign Trade Bank Ltd",
+      "weight": 12,
+      "docs_count": 12
+    },
+    {
+      "source": "SINCAT - Società Industriale Catanese SpA",
+      "target": "Montecatini Edison SpA",
+      "weight": 12,
+      "docs_count": 12
+    },
+    {
+      "source": "Cantieri Navali del Tirreno e Riuniti SpA in Liquidazione Speciale",
+      "target": "Fincantieri - Società Finanziaria Cantieri Navali SpA",
+      "weight": 11,
+      "docs_count": 11
+    },
+    {
+      "source": "Officine Meccaniche Giovanni Cerutti SpA",
+      "target": "Cerutti, Carlo",
+      "weight": 10,
+      "docs_count": 10
+    },
+    {
+      "source": "Incar (Nigeria) Ltd",
+      "target": "Intersomer - Società Mercantile Internazionale SpA",
+      "weight": 9,
+      "docs_count": 9
+    },
+    {
+      "source": "Officine Meccaniche Giovanni Cerutti SpA",
+      "target": "Cerutti, Luigi",
+      "weight": 9,
+      "docs_count": 9
+    },
+    {
+      "source": "Termomeccanica Italiana SpA",
+      "target": "Finmeccanica - Società Finanziaria Meccanica SpA",
+      "weight": 9,
+      "docs_count": 9
+    },
+    {
+      "source": "Cantieri Navali di Taranto SpA",
+      "target": "FIAT SpA [2°]",
+      "weight": 8,
+      "docs_count": 8
+    },
+    {
+      "source": "Cartiera di Cairate SpA",
+      "target": "Mayer, Astorre",
+      "weight": 8,
+      "docs_count": 8
+    },
+    {
+      "source": "Cartiera di Cairate SpA",
+      "target": "Mayer, Maurizio",
+      "weight": 8,
+      "docs_count": 8
+    },
+    {
+      "source": "Montecatini Edison SpA",
+      "target": "State Bank of India",
+      "weight": 8,
+      "docs_count": 8
+    },
+    {
+      "source": "Fabbriche Accumulatori Hensemberger SpA",
+      "target": "Reiser, Franco",
+      "weight": 7,
+      "docs_count": 7
+    },
+    {
+      "source": "Fratelli Marzoli & C. SpA [1°]",
+      "target": "Marzoli, Angelo",
+      "weight": 7,
+      "docs_count": 7
+    },
+    {
+      "source": "Fratelli Marzoli & C. SpA [1°]",
+      "target": "Marzoli, Martino",
+      "weight": 7,
+      "docs_count": 7
+    }
+  ]
+}
