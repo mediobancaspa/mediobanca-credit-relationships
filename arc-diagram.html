@@ -1,0 +1,1936 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Arc Diagram — Soci & Garanzie (Mediobanca)</title>
+
+  <style>
+    :root{
+      --bg:#000000;
+      --fg:#ffffff;
+      --muted:#c9c9c9;
+      --gold:#bd9554;
+
+      --panel:#000000;
+
+      --btn-bg:#f0f0f0;
+      --btn-fg:#000000;
+
+      --node: rgba(128, 0, 128, 0.55);
+      --node-stroke: rgba(255,255,255,0.55);
+
+      --arc: rgba(189,149,84,0.35);
+      --arc-strong: rgba(189,149,84,0.75);
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Century Gothic', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    #viz {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 80%;
+      height: 100%;
+      background: var(--bg);
+    }
+
+    #canvas{
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+    }
+
+    #canvas.dragging{
+      cursor: grabbing;
+    }
+
+    #infos {
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 20%;
+      height: 100%;
+      background: var(--panel);
+      overflow-y: auto;
+      box-shadow: 2px 3px 10px rgba(0,0,0,0.27);
+    }
+
+    #infos_cont {
+      width: 88%;
+      margin: 18px auto 24px auto;
+    }
+
+    .panel-title {
+      font-weight: 700;
+      font-size: 17px;
+      line-height: 1.2;
+      margin-top: 6px;
+      margin-bottom: 12px;
+      color: var(--fg);
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      column-gap: 12px;
+      row-gap: 10px;
+      align-items: start;
+    }
+
+    .info-label {
+      text-align: right;
+      font-weight: 700;
+      font-size: 13px;
+      line-height: 1.35;
+      color: var(--fg);
+    }
+
+    .info-value {
+      font-size: 13px;
+      line-height: 1.4;
+      color: var(--fg);
+      word-break: break-word;
+    }
+
+    .separator {
+      border-top: 2px solid var(--gold);
+      width: 75%;
+      margin: 18px auto;
+    }
+
+    #search-container{
+      position: absolute;
+      left: 16px;
+      top: 20px;
+      z-index: 3;
+      width: calc(80% - 32px);
+      pointer-events: none;
+    }
+
+    #search-row{
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      width: 100%;
+      pointer-events: auto;
+    }
+
+    #search{
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: 1px solid var(--gold);
+      background-color: var(--btn-bg);
+      color: var(--gold);
+      outline: none;
+      width: 360px;
+      max-width: 48vw;
+      font-size: 16px;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    #search:hover { background-color: #e0e0e0; }
+
+    #search:focus {
+      background-color: #d0d0d0;
+      box-shadow: 0 0 5px 2px var(--gold);
+      border-color: var(--gold);
+    }
+
+    #search::placeholder { color: var(--gold); }
+
+    .btn-inline{
+      background-color: var(--btn-bg);
+      color: var(--btn-fg);
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      font-family: 'Century Gothic', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      white-space: nowrap;
+    }
+
+    .btn-inline:hover {
+      background-color: var(--gold);
+      border-color: var(--gold);
+    }
+
+    .btn-inline:active {
+      background-color: var(--gold);
+      border-color: var(--gold);
+    }
+
+    .btn-inline.active{
+      background-color: var(--gold);
+      border-color: var(--gold);
+    }
+
+    #suggestions {
+      pointer-events: auto;
+      width: 360px;
+      max-width: 48vw;
+      margin-top: 6px;
+      background-color: var(--btn-bg);
+      color: var(--gold);
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+      max-height: 220px;
+      overflow-y: auto;
+      padding: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      display: none;
+    }
+
+    .s-item{
+      padding: 8px 12px;
+      cursor: pointer;
+      background-color: var(--btn-bg);
+      border-bottom: 1px solid var(--gold);
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+
+    .s-item:last-child{ border-bottom: none; }
+
+    .s-item:hover{
+      background-color: var(--gold);
+      color: #000;
+    }
+
+    button.sidebar-btn {
+      background-color: var(--btn-bg);
+      color: var(--btn-fg);
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+      padding: 10px 14px;
+      cursor: pointer;
+      display: block;
+      margin-top: 10px;
+      width: 100%;
+      text-align: center;
+      transition: background-color 0.3s ease;
+      font-family: 'Century Gothic', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    button.sidebar-btn:hover {
+      background-color: var(--gold);
+      border-color: var(--gold);
+    }
+
+    button.sidebar-btn:active {
+      background-color: var(--gold);
+      border-color: var(--gold);
+    }
+
+    #btn-docs{
+      background-color: var(--gold);
+      color: #000;
+    }
+
+    #btn-docs:hover {
+      background-color: #e0c85f;
+    }
+
+    .dataset-meta {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .dataset-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .dataset-meta-row span:first-child {
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .dataset-meta-row span:last-child {
+      color: var(--fg);
+      text-align: right;
+    }
+
+    .legend-box {
+      margin-top: 22px;
+      padding-top: 16px;
+      border-top: 2px solid var(--gold);
+    }
+
+    .legend-title {
+      font-weight: 700;
+      font-size: 13px;
+      line-height: 1.35;
+      color: var(--fg);
+      margin-bottom: 10px;
+      text-align: center;
+      letter-spacing: 0.02em;
+    }
+
+    .legend-image-wrap {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .legend-image {
+      display: block;
+      width: 100%;
+      max-width: 320px;
+      height: auto;
+      border: 1px solid rgba(189,149,84,0.35);
+      border-radius: 8px;
+      background: #111;
+    }
+
+    #hud{
+      position: absolute;
+      left: 16px;
+      bottom: 12px;
+      z-index: 2;
+      color: var(--muted);
+      font-size: 12px;
+      pointer-events: none;
+      max-width: calc(80% - 32px);
+    }
+
+    .adj-modal.hidden,
+    .docs-modal.hidden {
+      display: none;
+    }
+
+    .adj-modal,
+    .docs-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+    }
+
+    .docs-modal {
+      z-index: 10000;
+    }
+
+    .adj-backdrop,
+    .docs-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(2px);
+    }
+
+    .docs-backdrop {
+      background: rgba(0,0,0,0.76);
+    }
+
+    .adj-panel,
+    .docs-panel {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #111;
+      border: 1px solid var(--gold);
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      color: #fff;
+      font-family: 'Century Gothic', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    .adj-panel {
+      width: min(92vw, 1400px);
+      height: min(88vh, 900px);
+    }
+
+    .docs-panel {
+      width: min(92vw, 1100px);
+      height: min(86vh, 840px);
+    }
+
+    .adj-header,
+    .docs-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 18px 20px;
+      border-bottom: 1px solid rgba(189,149,84,0.35);
+      background: #0b0b0b;
+    }
+
+    .adj-header h2,
+    .docs-header h2 {
+      margin: 0 0 6px 0;
+      font-size: 22px;
+      color: var(--gold);
+    }
+
+    .adj-subtitle,
+    .docs-subtitle {
+      font-size: 14px;
+      color: #ddd;
+      line-height: 1.4;
+    }
+
+    .adj-actions,
+    .docs-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .adj-actions button,
+    .docs-actions button {
+      background-color: var(--btn-bg);
+      color: var(--btn-fg);
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      font-family: 'Century Gothic', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      white-space: nowrap;
+    }
+
+    .adj-actions button:hover,
+    .docs-actions button:hover {
+      background-color: var(--gold);
+      border-color: var(--gold);
+    }
+
+    .adj-table-wrap,
+    .docs-body {
+      flex: 1;
+      overflow: auto;
+      padding: 16px;
+      background: #000;
+    }
+
+    .adj-matrix {
+      border-collapse: collapse;
+      min-width: max-content;
+      width: 100%;
+    }
+
+    .adj-matrix th,
+    .adj-matrix td {
+      border: 1px solid rgba(189,149,84,0.28);
+      padding: 8px 10px;
+      text-align: center;
+      white-space: nowrap;
+      font-size: 13px;
+    }
+
+    .adj-matrix th {
+      background: #171717;
+      color: #bd9554;
+      position: sticky;
+      z-index: 2;
+    }
+
+    .adj-matrix thead th {
+      top: 0;
+    }
+
+    .adj-matrix tbody th {
+      left: 0;
+      z-index: 1;
+      text-align: left;
+      max-width: 280px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .adj-matrix td {
+      color: #fff;
+      background: #050505;
+    }
+
+    .adj-matrix td.active {
+      background: rgba(189,149,84,0.22);
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .adj-empty,
+    .docs-empty {
+      padding: 24px;
+      color: #ddd;
+      font-size: 15px;
+    }
+
+    .docs-summary {
+      margin-bottom: 14px;
+      color: #ddd;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .docs-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .doc-item {
+      border: 1px solid rgba(189,149,84,0.28);
+      border-radius: 10px;
+      background: #0b0b0b;
+      padding: 12px 14px;
+    }
+
+    .doc-item-title {
+      color: var(--gold);
+      font-weight: 700;
+      margin-bottom: 6px;
+      word-break: break-word;
+    }
+
+    .doc-item-meta {
+      color: #ddd;
+      font-size: 13px;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .hover-label {
+      position: absolute;
+      z-index: 5;
+      pointer-events: none;
+      display: none;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: rgba(11,11,11,0.94);
+      border: 1px solid rgba(189,149,84,0.9);
+      color: #fff;
+      font-size: 13px;
+      line-height: 1.2;
+      white-space: nowrap;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+      max-width: 320px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="viz">
+    <canvas id="canvas"></canvas>
+    <div id="hud"></div>
+    <div id="hover-label" class="hover-label"></div>
+  </div>
+
+  <div id="infos">
+    <div id="infos_cont">
+
+      <div class="panel-title">Dettagli nodo</div>
+
+      <div class="info-grid">
+        <div class="info-label">Nome:</div>
+        <div class="info-value" id="nName">Seleziona un nodo</div>
+
+        <div class="info-label">IdxDams:</div>
+        <div class="info-value" id="nIdxDams">—</div>
+
+        <div class="info-label">Importanza:</div>
+        <div class="info-value" id="nScore">—</div>
+
+        <div class="info-label">Connessioni:</div>
+        <div class="info-value" id="nDegree">—</div>
+
+        <div class="info-label">Dataset:</div>
+        <div class="info-value" id="nDataset">—</div>
+      </div>
+
+      <div class="separator"></div>
+
+      <button class="sidebar-btn" id="btn-docs">VEDI I DOCUMENTI</button>
+      <button class="sidebar-btn" id="btn-adj">APRI MATRICE DI ADIACENZA</button>
+
+      <div class="separator"></div>
+
+      <button class="sidebar-btn" id="btn-reset">RESET VISTA</button>
+
+      <div class="separator"></div>
+
+      <div class="dataset-meta">
+        <div class="dataset-meta-row"><span>Stato:</span><span id="iStatus"></span></div>
+        <div class="dataset-meta-row"><span>Dataset:</span><span id="iDataset"></span></div>
+        <div class="dataset-meta-row"><span>Nodi:</span><span id="iNNodes"></span></div>
+        <div class="dataset-meta-row"><span>Archi:</span><span id="iNEdges"></span></div>
+      </div>
+
+      <div class="legend-box">
+        <div class="legend-title">LETTURA DEL DIAGRAMMA</div>
+        <div class="legend-image-wrap">
+          <img
+            class="legend-image"
+            src="assets/img/arc-diagram-legend.png"
+            alt="Schema di lettura dell'arc diagram"
+          />
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="search-container">
+    <div id="search-row">
+      <input type="text" id="search" placeholder="Cerca un nodo..." autocomplete="off" />
+      <button class="btn-inline" id="btn-soci">SOCI</button>
+      <button class="btn-inline" id="btn-garanzie">GARANZIE</button>
+    </div>
+    <div id="suggestions"></div>
+  </div>
+
+  <div id="adj-modal" class="adj-modal hidden" aria-hidden="true">
+    <div class="adj-backdrop"></div>
+    <div class="adj-panel" role="dialog" aria-modal="true" aria-labelledby="adj-title">
+      <div class="adj-header">
+        <div>
+          <h2 id="adj-title">Matrice di adiacenza</h2>
+          <div id="adj-subtitle" class="adj-subtitle"></div>
+        </div>
+        <div class="adj-actions">
+          <button id="adj-download-btn" type="button">Scarica CSV</button>
+          <button id="adj-close-btn" type="button">Chiudi</button>
+        </div>
+      </div>
+      <div id="adj-table-wrap" class="adj-table-wrap"></div>
+    </div>
+  </div>
+
+  <div id="docs-modal" class="docs-modal hidden" aria-hidden="true">
+    <div class="docs-backdrop"></div>
+    <div class="docs-panel" role="dialog" aria-modal="true" aria-labelledby="docs-title">
+      <div class="docs-header">
+        <div>
+          <h2 id="docs-title">Documenti collegati</h2>
+          <div id="docs-subtitle" class="docs-subtitle"></div>
+        </div>
+        <div class="docs-actions">
+          <button id="docs-download-btn" type="button">Scarica CSV</button>
+          <button id="docs-close-btn" type="button">Chiudi</button>
+        </div>
+      </div>
+      <div id="docs-body" class="docs-body"></div>
+    </div>
+  </div>
+
+  <script>
+/* ======================
+   CONFIG
+====================== */
+const EDGE_FILES = {
+  const SOCI_PATH = "data/graph/soci_edges_by_name_with_idxdams_rebuilt.json";
+  const GARANZIE_PATH = "data/graph/garanzie_edges_by_name_with_idxdams_rebuilt.json";
+};
+
+const LABELS = {
+  soci: "SOCI",
+  garanzie: "GARANZIE"
+};
+
+const VIEW_CFG = {
+  minZoom: 0.55,
+  maxZoom: 3.2,
+  zoomStep: 1.12,
+  initialZoom: 1,
+  initialPanY: -60,
+  autoLabelZoomThreshold: 1.45,
+};
+
+/* ======================
+   STATE
+====================== */
+const appState = {
+  datasetKey: "soci",
+  datasets: {
+    soci: { edges: [], edgeById: new Map(), nodes: new Map(), importance: new Map() },
+    garanzie: { edges: [], edgeById: new Map(), nodes: new Map(), importance: new Map() },
+  },
+  ready: false,
+  visibleNodeNames: new Set(),
+  selectedNodeName: null,
+  selectedEdge: null,
+  selectedDocsPayload: null,
+  hoveredNodeName: null,
+  view: {
+    zoom: VIEW_CFG.initialZoom,
+    panX: 0,
+    panY: VIEW_CFG.initialPanY,
+    isDragging: false,
+    dragStartX: 0,
+    dragStartY: 0,
+    dragPanStartX: 0,
+    dragPanStartY: 0,
+  }
+};
+
+/* ======================
+   DOM
+====================== */
+const $ = (id) => document.getElementById(id);
+
+const canvas = $("canvas");
+const ctx = canvas.getContext("2d");
+const hud = $("hud");
+const hoverLabel = $("hover-label");
+
+const adjModal = $("adj-modal");
+const adjCloseBtn = $("adj-close-btn");
+const adjDownloadBtn = $("adj-download-btn");
+const adjTableWrap = $("adj-table-wrap");
+const adjSubtitle = $("adj-subtitle");
+
+const docsModal = $("docs-modal");
+const docsCloseBtn = $("docs-close-btn");
+const docsDownloadBtn = $("docs-download-btn");
+const docsBody = $("docs-body");
+const docsSubtitle = $("docs-subtitle");
+
+let currentAdjData = null;
+
+/* ======================
+   HELPERS
+====================== */
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function clamp(v, min, max) {
+  return Math.max(min, Math.min(max, v));
+}
+
+function normalizeWeight(edge) {
+  const candidates = [
+    edge?.weight,
+    edge?.peso,
+    edge?.value,
+    edge?.valore,
+    edge?.size
+  ];
+
+  for (const c of candidates) {
+    const n = Number(c);
+    if (!Number.isNaN(n)) return n;
+  }
+  return 1;
+}
+
+function dedupePreserveOrder(arr) {
+  return [...new Set(arr)];
+}
+
+function sanitizeFilename(str) {
+  return String(str ?? "")
+    .trim()
+    .replace(/[^\w\-]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 80) || "export";
+}
+
+function getCurrentDataset() {
+  return appState.datasets[appState.datasetKey];
+}
+
+function worldToScreen(x, y) {
+  const v = appState.view;
+  return {
+    x: x * v.zoom + v.panX,
+    y: y * v.zoom + v.panY
+  };
+}
+
+function screenToWorld(x, y) {
+  const v = appState.view;
+  return {
+    x: (x - v.panX) / v.zoom,
+    y: (y - v.panY) / v.zoom
+  };
+}
+
+function resetView() {
+  appState.view.zoom = VIEW_CFG.initialZoom;
+  appState.view.panX = 0;
+  appState.view.panY = VIEW_CFG.initialPanY;
+}
+
+function hideHoverLabel() {
+  hoverLabel.style.display = "none";
+}
+
+function showHoverLabel(text, x, y) {
+  hoverLabel.textContent = text;
+  hoverLabel.style.display = "block";
+
+  const vizRect = $("viz").getBoundingClientRect();
+  const labelRect = hoverLabel.getBoundingClientRect();
+
+  let left = x + 14;
+  let top = y - labelRect.height - 10;
+
+  if (left + labelRect.width > vizRect.width - 10) {
+    left = x - labelRect.width - 14;
+  }
+  if (left < 8) left = 8;
+
+  if (top < 8) {
+    top = y + 14;
+  }
+
+  hoverLabel.style.left = `${left}px`;
+  hoverLabel.style.top = `${top}px`;
+}
+
+/* ======================
+   DOCS HELPERS
+====================== */
+function getDocsForNode(nodeName) {
+  if (!nodeName || !appState.ready) return [];
+
+  const ds = getCurrentDataset();
+  const incidentEdges = ds.incident?.get(nodeName) || [];
+
+  const docs = [];
+  for (const edge of incidentEdges) {
+    for (const doc of (edge.docs || [])) {
+      docs.push(doc);
+    }
+  }
+
+  return dedupePreserveOrder(docs);
+}
+
+function buildDocsPayloadFromEdge(edge) {
+  const docs = dedupePreserveOrder(edge?.docs || []);
+  return {
+    kind: "edge",
+    title: "Documenti del legame",
+    subtitle: `${edge.source} → ${edge.target} · dataset ${LABELS[appState.datasetKey]} · peso ${edge.weight} · ${docs.length} documenti`,
+    docs,
+    filename: `documenti_legame_${sanitizeFilename(edge.source)}_${sanitizeFilename(edge.target)}.csv`,
+  };
+}
+
+function buildDocsPayloadFromNode(nodeName) {
+  const ds = getCurrentDataset();
+  const docs = getDocsForNode(nodeName);
+  const incidentEdges = ds.incident?.get(nodeName) || [];
+
+  return {
+    kind: "node",
+    title: "Documenti del nodo",
+    subtitle: `${nodeName} · dataset ${LABELS[appState.datasetKey]} · ${incidentEdges.length} legami incidenti · ${docs.length} documenti unici`,
+    docs,
+    filename: `documenti_nodo_${sanitizeFilename(nodeName)}.csv`,
+  };
+}
+
+function renderDocsModal(payload) {
+  if (!payload) {
+    docsBody.innerHTML = `<div class="docs-empty">Nessun dato disponibile.</div>`;
+    docsSubtitle.textContent = "";
+    return;
+  }
+
+  docsSubtitle.textContent = payload.subtitle || "";
+
+  if (!payload.docs || payload.docs.length === 0) {
+    docsBody.innerHTML = `
+      <div class="docs-summary">Nessun documento associato.</div>
+      <div class="docs-empty">Questo elemento non ha documenti collegati nel JSON corrente.</div>
+    `;
+    return;
+  }
+
+  const items = payload.docs.map((doc, i) => `
+    <div class="doc-item">
+      <div class="doc-item-title">${i + 1}. ${escapeHtml(doc)}</div>
+      <div class="doc-item-meta">Codice scheda xDams</div>
+    </div>
+  `).join("");
+
+  docsBody.innerHTML = `
+    <div class="docs-summary">
+      <b>Totale documenti:</b> ${payload.docs.length}
+    </div>
+    <div class="docs-list">
+      ${items}
+    </div>
+  `;
+}
+
+function openDocsModal(payload) {
+  appState.selectedDocsPayload = payload;
+  renderDocsModal(payload);
+  docsModal.classList.remove("hidden");
+  docsModal.setAttribute("aria-hidden", "false");
+}
+
+function closeDocsModal() {
+  docsModal.classList.add("hidden");
+  docsModal.setAttribute("aria-hidden", "true");
+}
+
+function downloadDocsCSV(payload) {
+  if (!payload || !payload.docs) return;
+
+  const rows = [["Codice xDams"], ...payload.docs.map(doc => [doc])];
+
+  const csv = rows.map(row =>
+    row.map(value => `"${String(value ?? "").replace(/"/g, '""')}"`).join(";")
+  ).join("\n");
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = payload.filename || "documenti.csv";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+/* ======================
+   CANVAS RESIZE
+====================== */
+function resizeCanvas() {
+  const viz = $("viz").getBoundingClientRect();
+  canvas.width = Math.floor(viz.width * window.devicePixelRatio);
+  canvas.height = Math.floor(viz.height * window.devicePixelRatio);
+  canvas.style.width = viz.width + "px";
+  canvas.style.height = viz.height + "px";
+  drawNodes();
+}
+
+window.addEventListener("resize", resizeCanvas);
+
+/* ======================
+   FETCH + INDEX
+====================== */
+async function fetchJson(path) {
+  const res = await fetch(path, { cache: "no-store" });
+  if (!res.ok) {
+    throw new Error(`Errore fetch ${path}: ${res.status} ${res.statusText}`);
+  }
+  return res.json();
+}
+
+function indexEdgesAndNodes(edgesRaw) {
+  const edgeById = new Map();
+  const nodes = new Map();
+  const importance = new Map();
+  const incident = new Map();
+  const degree = new Map();
+
+  let wMin = Infinity;
+  let wMax = -Infinity;
+
+  const edges = edgesRaw.map((e) => {
+    const w = (e.weight ?? 1);
+    wMin = Math.min(wMin, w);
+    wMax = Math.max(wMax, w);
+
+    const edge = {
+      id: e.id,
+      type: e.type,
+      weight: w,
+      source: e.source,
+      target: e.target,
+      source_id: e.source_id,
+      target_id: e.target_id,
+      source_IdxDams: e.source_IdxDams ?? null,
+      target_IdxDams: e.target_IdxDams ?? null,
+      docs_count: e.docs_count ?? (Array.isArray(e.docs) ? e.docs.length : 0),
+      docs: Array.isArray(e.docs) ? e.docs : [],
+    };
+
+    if (edge.id != null) {
+      edgeById.set(String(edge.id), edge);
+    }
+
+    if (edge.source && !nodes.has(edge.source)) {
+      nodes.set(edge.source, { name: edge.source, codice: edge.source_IdxDams ?? null });
+    }
+
+    if (edge.target && !nodes.has(edge.target)) {
+      nodes.set(edge.target, { name: edge.target, codice: edge.target_IdxDams ?? null });
+    }
+
+    if (edge.source) {
+      importance.set(edge.source, (importance.get(edge.source) || 0) + w);
+    }
+    if (edge.target) {
+      importance.set(edge.target, (importance.get(edge.target) || 0) + w);
+    }
+
+    if (edge.source) {
+      if (!incident.has(edge.source)) incident.set(edge.source, []);
+      incident.get(edge.source).push(edge);
+      degree.set(edge.source, (degree.get(edge.source) || 0) + 1);
+    }
+
+    if (edge.target) {
+      if (!incident.has(edge.target)) incident.set(edge.target, []);
+      incident.get(edge.target).push(edge);
+      degree.set(edge.target, (degree.get(edge.target) || 0) + 1);
+    }
+
+    return edge;
+  });
+
+  if (!isFinite(wMin)) wMin = 0;
+  if (!isFinite(wMax)) wMax = 1;
+
+  return {
+    edges,
+    edgeById,
+    nodes,
+    importance,
+    incident,
+    degree,
+    wMin,
+    wMax,
+    _nodePositions: new Map(),
+    _renderedArcs: [],
+  };
+}
+
+async function loadAllEdgeDatasets() {
+  appState.ready = false;
+  updateStats();
+  hud.textContent = "Caricamento datasets…";
+
+  const [sociEdgesRaw, garanzieEdgesRaw] = await Promise.all([
+    fetchJson(EDGE_FILES.soci),
+    fetchJson(EDGE_FILES.garanzie),
+  ]);
+
+  appState.datasets.soci = indexEdgesAndNodes(sociEdgesRaw);
+  appState.datasets.garanzie = indexEdgesAndNodes(garanzieEdgesRaw);
+
+  appState.ready = true;
+}
+
+/* ======================
+   DATASET SWITCH
+====================== */
+function setActiveDatasetButton() {
+  const isSoci = appState.datasetKey === "soci";
+  $("btn-soci").classList.toggle("active", isSoci);
+  $("btn-garanzie").classList.toggle("active", !isSoci);
+}
+
+function getTopNNodes(ds, n) {
+  const arr = [];
+  for (const [name, node] of ds.nodes.entries()) {
+    const score = ds.importance?.get(name) || 0;
+    arr.push({ name, codice: node.codice ?? null, score });
+  }
+  arr.sort((a, b) => b.score - a.score);
+  return arr.slice(0, n);
+}
+
+function setDataset(key) {
+  if (!(key in appState.datasets)) {
+    throw new Error(`Dataset sconosciuto: ${key}`);
+  }
+
+  appState.datasetKey = key;
+  appState.selectedEdge = null;
+  appState.selectedNodeName = null;
+  appState.selectedDocsPayload = null;
+  appState.hoveredNodeName = null;
+  currentAdjData = null;
+
+  closeAdjModal();
+  closeDocsModal();
+  hideHoverLabel();
+
+  const ds = getCurrentDataset();
+  const top30 = getTopNNodes(ds, 30);
+  appState.visibleNodeNames = new Set(top30.map(n => n.name));
+
+  resetView();
+  setActiveDatasetButton();
+  updateEdgePanel(null);
+  updateNodePanel(null);
+  updateStats();
+  drawNodes();
+  hud.textContent = `Dataset attivo: ${LABELS[key]} (mostro top 30)`;
+}
+
+/* ======================
+   FOCUS / SELECT
+====================== */
+function focusNode(nodeName) {
+  if (!appState.ready) return;
+
+  const ds = getCurrentDataset();
+
+  appState.selectedNodeName = nodeName;
+  appState.selectedEdge = null;
+
+  const top30 = getTopNNodes(ds, 30).map(n => n.name);
+  appState.visibleNodeNames = new Set(top30);
+
+  appState.visibleNodeNames.add(nodeName);
+
+  const inc = ds.incident?.get(nodeName) || [];
+  for (const e of inc) {
+    if (e.source) appState.visibleNodeNames.add(e.source);
+    if (e.target) appState.visibleNodeNames.add(e.target);
+  }
+
+  updateEdgePanel(null);
+  updateNodePanel(nodeName);
+  drawNodes();
+  hud.textContent = `Nodo selezionato: ${nodeName}`;
+}
+
+function selectEdge(edge) {
+  if (!edge) return;
+  appState.selectedEdge = edge;
+  drawNodes();
+  hud.textContent = `Legame selezionato: ${edge.source} → ${edge.target}`;
+}
+
+/* ======================
+   SIDEBAR PANELS
+====================== */
+function updateEdgePanel(edge) {
+  return;
+}
+
+function updateNodePanel(nodeName) {
+  if (!nodeName || !appState.ready) {
+    $("nName").textContent = "Seleziona un nodo";
+    $("nIdxDams").textContent = "—";
+    $("nScore").textContent = "—";
+    $("nDegree").textContent = "—";
+    $("nDataset").textContent = LABELS[appState.datasetKey];
+    return;
+  }
+
+  const ds = getCurrentDataset();
+  const node = ds.nodes.get(nodeName);
+  const score = ds.importance?.get(nodeName) || 0;
+  const deg = ds.degree?.get(nodeName) || 0;
+
+  $("nName").textContent = nodeName;
+  $("nIdxDams").textContent = node?.codice ?? "—";
+  $("nScore").textContent = String(score);
+  $("nDegree").textContent = String(deg);
+  $("nDataset").textContent = LABELS[appState.datasetKey];
+}
+
+function updateStats() {
+  const ds = getCurrentDataset();
+  $("iStatus").textContent = appState.ready ? "pronto" : "caricamento…";
+  $("iDataset").textContent = LABELS[appState.datasetKey];
+  $("iNNodes").textContent = appState.ready ? ds.nodes.size : "—";
+  $("iNEdges").textContent = appState.ready ? ds.edges.length : "—";
+}
+
+/* ======================
+   ADJACENCY MATRIX
+====================== */
+function buildLocalAdjacencyData(nodeName) {
+  if (!nodeName || !appState.ready) return null;
+
+  const ds = getCurrentDataset();
+  const neighborhood = new Set([nodeName]);
+  const inc = ds.incident?.get(nodeName) || [];
+
+  for (const e of inc) {
+    if (e.source) neighborhood.add(e.source);
+    if (e.target) neighborhood.add(e.target);
+  }
+
+  const nodes = Array.from(neighborhood).map((name) => {
+    const node = ds.nodes.get(name);
+    return {
+      id: name,
+      name,
+      codice: node?.codice ?? null,
+      score: ds.importance?.get(name) || 0
+    };
+  });
+
+  nodes.sort((a, b) => {
+    if (a.name === nodeName) return -1;
+    if (b.name === nodeName) return 1;
+    return a.name.localeCompare(b.name, "it");
+  });
+
+  const idToIndex = new Map(nodes.map((n, i) => [n.id, i]));
+  const matrix = Array.from({ length: nodes.length }, () => Array(nodes.length).fill(0));
+
+  for (const e of ds.edges) {
+    if (idToIndex.has(e.source) && idToIndex.has(e.target)) {
+      const i = idToIndex.get(e.source);
+      const j = idToIndex.get(e.target);
+      matrix[i][j] += normalizeWeight(e);
+    }
+  }
+
+  return {
+    selectedNodeId: nodeName,
+    selectedNodeName: nodeName,
+    dataset: LABELS[appState.datasetKey],
+    nodes,
+    matrix
+  };
+}
+
+function renderAdjacencyTable(adjData) {
+  if (!adjData || !adjData.nodes.length) {
+    adjTableWrap.innerHTML = `<div class="adj-empty">Nessun dato disponibile.</div>`;
+    return;
+  }
+
+  const headers = adjData.nodes.map(n => `
+    <th title="${escapeHtml(n.name)}">${escapeHtml(n.name)}</th>
+  `).join("");
+
+  const rows = adjData.nodes.map((rowNode, i) => {
+    const cells = adjData.matrix[i].map(val => {
+      const num = Number(val) || 0;
+      const isActive = num !== 0;
+      const displayVal = Number.isInteger(num) ? num : num.toFixed(2);
+      return `<td class="${isActive ? "active" : ""}">${displayVal}</td>`;
+    }).join("");
+
+    return `
+      <tr>
+        <th title="${escapeHtml(rowNode.name)}">${escapeHtml(rowNode.name)}</th>
+        ${cells}
+      </tr>
+    `;
+  }).join("");
+
+  adjTableWrap.innerHTML = `
+    <table class="adj-matrix">
+      <thead>
+        <tr>
+          <th>Nodo</th>
+          ${headers}
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+  `;
+
+  adjSubtitle.textContent =
+    `Nodo selezionato: ${adjData.selectedNodeName} · ${adjData.nodes.length} nodi nel sottografo locale · dataset ${adjData.dataset} · matrice pesata`;
+}
+
+function openAdjModal() {
+  adjModal.classList.remove("hidden");
+  adjModal.setAttribute("aria-hidden", "false");
+}
+
+function closeAdjModal() {
+  adjModal.classList.add("hidden");
+  adjModal.setAttribute("aria-hidden", "true");
+}
+
+function downloadAdjacencyCSV(adjData) {
+  if (!adjData) return;
+
+  const headers = ["Nodo", ...adjData.nodes.map(n => n.name)];
+  const lines = [headers];
+
+  adjData.nodes.forEach((rowNode, i) => {
+    lines.push([rowNode.name, ...adjData.matrix[i]]);
+  });
+
+  const csv = lines
+    .map(row =>
+      row.map(value => {
+        const str = String(value ?? "");
+        return `"${str.replace(/"/g, '""')}"`;
+      }).join(";")
+    )
+    .join("\n");
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `matrice_adiacenza_${adjData.selectedNodeId}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+/* ======================
+   DRAW
+====================== */
+function getVisibleNodesOrdered(ds) {
+  const arr = [];
+  for (const name of appState.visibleNodeNames) {
+    const node = ds.nodes.get(name);
+    if (!node) continue;
+    const score = ds.importance?.get(name) || 0;
+    arr.push({ name, codice: node.codice ?? null, score });
+  }
+  arr.sort((a, b) => b.score - a.score);
+  return arr;
+}
+
+function radiusFromScore(score, minScore, maxScore) {
+  const rMin = 6;
+  const rMax = 22;
+
+  if (maxScore <= minScore) return (rMin + rMax) / 2;
+
+  const t = (score - minScore) / (maxScore - minScore);
+  return rMin + t * (rMax - rMin);
+}
+
+function lineWidthFromWeight(weight, wMin, wMax) {
+  const minW = 1.4;
+  const maxW = 7.0;
+
+  const a = Math.log1p(Math.max(0, wMin));
+  const b = Math.log1p(Math.max(0, wMax));
+  const x = Math.log1p(Math.max(0, weight));
+
+  if (b <= a) return (minW + maxW) / 2;
+
+  const t = (x - a) / (b - a);
+  const tt = Math.max(0, Math.min(1, t));
+  return minW + tt * (maxW - minW);
+}
+
+function alphaFromWeight(weight, wMin, wMax) {
+  const minA = 0.35;
+  const maxA = 0.92;
+
+  const a = Math.log1p(Math.max(0, wMin));
+  const b = Math.log1p(Math.max(0, wMax));
+  const x = Math.log1p(Math.max(0, weight));
+
+  if (b <= a) return (minA + maxA) / 2;
+
+  const t = (x - a) / (b - a);
+  const tt = Math.max(0, Math.min(1, t));
+  return minA + tt * (maxA - minA);
+}
+
+function getWorldLayout(ds, visible, w, h) {
+  const baselineY = Math.floor(h * 0.70);
+  const leftPad = 40;
+  const rightPad = 40;
+
+  let minScore = Infinity;
+  let maxScore = -Infinity;
+
+  for (const n of visible) {
+    minScore = Math.min(minScore, n.score);
+    maxScore = Math.max(maxScore, n.score);
+  }
+
+  const span = (w - leftPad - rightPad);
+  const step = visible.length === 1 ? 0 : span / (visible.length - 1);
+
+  ds._nodePositions = new Map();
+
+  visible.forEach((n, i) => {
+    const x = leftPad + i * step;
+    const r = radiusFromScore(n.score, minScore, maxScore);
+    ds._nodePositions.set(n.name, { x, y: baselineY, r, score: n.score });
+  });
+
+  return { baselineY, leftPad, rightPad };
+}
+
+function drawArcsForSelectedNode(ds) {
+  const sel = appState.selectedNodeName;
+  ds._renderedArcs = [];
+
+  if (!sel) return;
+
+  const inc = ds.incident?.get(sel) || [];
+  if (!inc.length) return;
+
+  let localMin = Infinity;
+  let localMax = -Infinity;
+
+  for (const e of inc) {
+    localMin = Math.min(localMin, e.weight ?? 1);
+    localMax = Math.max(localMax, e.weight ?? 1);
+  }
+
+  if (!isFinite(localMin)) localMin = 0;
+  if (!isFinite(localMax)) localMax = 1;
+
+  for (const e of inc) {
+    const pS = ds._nodePositions.get(e.source);
+    const pT = ds._nodePositions.get(e.target);
+    if (!pS || !pT) continue;
+
+    const x1 = pS.x;
+    const x2 = pT.x;
+    const baselineY = pS.y;
+    const above = (e.source === sel) ? true : (e.target === sel) ? false : true;
+
+    const dist = Math.abs(x2 - x1);
+    const minH = 18;
+    const maxH = 280;
+    const h = Math.max(minH, Math.min(maxH, dist * 0.35));
+
+    const cx = (x1 + x2) / 2;
+    const cy = above ? (baselineY - h) : (baselineY + h);
+
+    let lw = lineWidthFromWeight(e.weight ?? 1, localMin, localMax);
+    let a = alphaFromWeight(e.weight ?? 1, localMin, localMax);
+
+    let stroke = (e.source === sel)
+      ? `rgba(189,149,84,${Math.min(1, a + 0.08)})`
+      : `rgba(189,149,84,${a})`;
+
+    if (appState.selectedEdge && appState.selectedEdge.id === e.id) {
+      lw += 2;
+      stroke = "rgba(255,255,255,0.95)";
+    }
+
+    ctx.beginPath();
+    ctx.lineWidth = lw;
+    ctx.strokeStyle = stroke;
+    ctx.moveTo(x1, baselineY);
+    ctx.quadraticCurveTo(cx, cy, x2, baselineY);
+    ctx.stroke();
+
+    ds._renderedArcs.push({
+      edge: e,
+      x1,
+      y1: baselineY,
+      cx,
+      cy,
+      x2,
+      y2: baselineY,
+      lineWidth: lw,
+    });
+  }
+}
+
+function drawAutoLabels(ds) {
+  if (appState.view.zoom < VIEW_CFG.autoLabelZoomThreshold) return;
+
+  const boxes = [];
+  ctx.textAlign = "center";
+
+  for (const [name, p] of ds._nodePositions.entries()) {
+    if (appState.hoveredNodeName === name) continue;
+
+    const screen = worldToScreen(p.x, p.y);
+    const sr = p.r * appState.view.zoom;
+
+    const maxChars = 22;
+    const label = name.length > maxChars ? name.slice(0, maxChars - 1) + "…" : name;
+
+    ctx.font = "11px Century Gothic, system-ui, sans-serif";
+    const textWidth = ctx.measureText(label).width;
+    const labelY = screen.y + sr + 14;
+
+    const box = {
+      x1: screen.x - textWidth / 2 - 4,
+      y1: labelY - 11,
+      x2: screen.x + textWidth / 2 + 4,
+      y2: labelY + 4
+    };
+
+    let overlaps = false;
+    for (const b of boxes) {
+      if (!(box.x2 < b.x1 || box.x1 > b.x2 || box.y2 < b.y1 || box.y1 > b.y2)) {
+        overlaps = true;
+        break;
+      }
+    }
+
+    if (!overlaps) {
+      ctx.fillStyle = "rgba(255,255,255,0.82)";
+      ctx.fillText(label, screen.x, labelY);
+      boxes.push(box);
+    }
+  }
+}
+
+function drawNodes() {
+  const viz = $("viz").getBoundingClientRect();
+  const w = viz.width;
+  const h = viz.height;
+
+  const dpr = window.devicePixelRatio || 1;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0, 0, w, h);
+
+  if (!appState.ready) {
+    ctx.fillStyle = "rgba(255,255,255,0.7)";
+    ctx.font = "16px Century Gothic, system-ui, sans-serif";
+    ctx.fillText("Caricamento…", 18, 42);
+    return;
+  }
+
+  const ds = getCurrentDataset();
+  const visible = getVisibleNodesOrdered(ds);
+  if (visible.length === 0) return;
+
+  getWorldLayout(ds, visible, w, h);
+
+  ctx.save();
+  ctx.translate(appState.view.panX, appState.view.panY);
+  ctx.scale(appState.view.zoom, appState.view.zoom);
+
+  const first = ds._nodePositions.get(visible[0].name);
+  const last = ds._nodePositions.get(visible[visible.length - 1].name);
+  if (first && last) {
+    ctx.strokeStyle = "rgba(255,255,255,0.20)";
+    ctx.lineWidth = 1 / appState.view.zoom;
+    ctx.beginPath();
+    ctx.moveTo(first.x - 10, first.y);
+    ctx.lineTo(last.x + 10, last.y);
+    ctx.stroke();
+  }
+
+  drawArcsForSelectedNode(ds);
+
+  for (const n of visible) {
+    const p = ds._nodePositions.get(n.name);
+    const x = p.x;
+    const y = p.y;
+    const r = p.r;
+    const isSelected = (appState.selectedNodeName === n.name);
+    const isHovered = (appState.hoveredNodeName === n.name);
+
+    ctx.beginPath();
+    ctx.fillStyle = isSelected
+      ? "rgba(189,149,84,0.95)"
+      : isHovered
+        ? "rgba(170,70,170,0.82)"
+        : "rgba(128,0,128,0.60)";
+    ctx.strokeStyle = isSelected ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.55)";
+    ctx.lineWidth = (isHovered ? 1.8 : 1.2) / appState.view.zoom;
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  ctx.restore();
+  drawAutoLabels(ds);
+
+  hud.textContent = `Visibili: ${visible.length} — Dataset: ${LABELS[appState.datasetKey]} — Zoom: ${appState.view.zoom.toFixed(2)}x`;
+}
+
+/* ======================
+   HIT TEST
+====================== */
+function getCanvasPoint(evt) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: evt.clientX - rect.left,
+    y: evt.clientY - rect.top
+  };
+}
+
+function findNodeAtPoint(screenX, screenY) {
+  if (!appState.ready) return null;
+
+  const ds = getCurrentDataset();
+  if (!ds._nodePositions) return null;
+
+  const world = screenToWorld(screenX, screenY);
+
+  const entries = Array.from(ds._nodePositions.entries())
+    .map(([name, p]) => ({ name, ...p }))
+    .sort((a, b) => b.r - a.r);
+
+  for (const n of entries) {
+    const dx = world.x - n.x;
+    const dy = world.y - n.y;
+    if ((dx * dx + dy * dy) <= (n.r * n.r)) {
+      return n.name;
+    }
+  }
+
+  return null;
+}
+
+function quadraticPoint(x1, y1, cx, cy, x2, y2, t) {
+  const mt = 1 - t;
+  const x = mt * mt * x1 + 2 * mt * t * cx + t * t * x2;
+  const y = mt * mt * y1 + 2 * mt * t * cy + t * t * y2;
+  return { x, y };
+}
+
+function distancePointToSegment(px, py, x1, y1, x2, y2) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+
+  if (dx === 0 && dy === 0) {
+    return Math.hypot(px - x1, py - y1);
+  }
+
+  const t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy)));
+  const projX = x1 + t * dx;
+  const projY = y1 + t * dy;
+  return Math.hypot(px - projX, py - projY);
+}
+
+function findEdgeAtPoint(screenX, screenY) {
+  if (!appState.ready) return null;
+
+  const ds = getCurrentDataset();
+  const arcs = ds._renderedArcs || [];
+  if (!arcs.length) return null;
+
+  const world = screenToWorld(screenX, screenY);
+
+  let best = null;
+  let bestDist = Infinity;
+
+  for (const arc of arcs) {
+    let prev = quadraticPoint(arc.x1, arc.y1, arc.cx, arc.cy, arc.x2, arc.y2, 0);
+    let minDist = Infinity;
+
+    const steps = 28;
+    for (let i = 1; i <= steps; i++) {
+      const t = i / steps;
+      const curr = quadraticPoint(arc.x1, arc.y1, arc.cx, arc.cy, arc.x2, arc.y2, t);
+      const d = distancePointToSegment(world.x, world.y, prev.x, prev.y, curr.x, curr.y);
+      if (d < minDist) minDist = d;
+      prev = curr;
+    }
+
+    const threshold = Math.max(6, arc.lineWidth + 4) / appState.view.zoom;
+    if (minDist <= threshold && minDist < bestDist) {
+      best = arc.edge;
+      bestDist = minDist;
+    }
+  }
+
+  return best;
+}
+
+/* ======================
+   INTERACTION: CLICK / MOVE / PAN / ZOOM
+====================== */
+canvas.addEventListener("click", (evt) => {
+  if (appState.view.isDragging) return;
+
+  const { x, y } = getCanvasPoint(evt);
+
+  const nodeName = findNodeAtPoint(x, y);
+  if (nodeName) {
+    focusNode(nodeName);
+    return;
+  }
+
+  const edge = findEdgeAtPoint(x, y);
+  if (edge) {
+    selectEdge(edge);
+  }
+});
+
+canvas.addEventListener("mousemove", (evt) => {
+  const { x, y } = getCanvasPoint(evt);
+
+  if (appState.view.isDragging) {
+    appState.view.panX = appState.view.dragPanStartX + (x - appState.view.dragStartX);
+    appState.view.panY = appState.view.dragPanStartY + (y - appState.view.dragStartY);
+    hideHoverLabel();
+    drawNodes();
+    return;
+  }
+
+  const nodeName = findNodeAtPoint(x, y);
+
+  if (nodeName !== appState.hoveredNodeName) {
+    appState.hoveredNodeName = nodeName;
+    drawNodes();
+  }
+
+  if (nodeName) {
+    showHoverLabel(nodeName, x, y);
+  } else {
+    hideHoverLabel();
+  }
+});
+
+canvas.addEventListener("mouseleave", () => {
+  appState.hoveredNodeName = null;
+  hideHoverLabel();
+
+  if (appState.view.isDragging) {
+    appState.view.isDragging = false;
+    canvas.classList.remove("dragging");
+  }
+
+  drawNodes();
+});
+
+canvas.addEventListener("mousedown", (evt) => {
+  const { x, y } = getCanvasPoint(evt);
+  appState.view.isDragging = true;
+  appState.view.dragStartX = x;
+  appState.view.dragStartY = y;
+  appState.view.dragPanStartX = appState.view.panX;
+  appState.view.dragPanStartY = appState.view.panY;
+  canvas.classList.add("dragging");
+});
+
+window.addEventListener("mouseup", () => {
+  if (appState.view.isDragging) {
+    appState.view.isDragging = false;
+    canvas.classList.remove("dragging");
+  }
+});
+
+canvas.addEventListener("wheel", (evt) => {
+  evt.preventDefault();
+
+  const { x, y } = getCanvasPoint(evt);
+  const worldBefore = screenToWorld(x, y);
+
+  const factor = evt.deltaY < 0 ? VIEW_CFG.zoomStep : 1 / VIEW_CFG.zoomStep;
+  const nextZoom = clamp(appState.view.zoom * factor, VIEW_CFG.minZoom, VIEW_CFG.maxZoom);
+
+  appState.view.zoom = nextZoom;
+  appState.view.panX = x - worldBefore.x * nextZoom;
+  appState.view.panY = y - worldBefore.y * nextZoom;
+
+  drawNodes();
+}, { passive: false });
+
+/* ======================
+   SEARCH
+====================== */
+function normalize(s) {
+  return (s || "").toLowerCase().trim();
+}
+
+function searchNodes(q) {
+  if (!appState.ready) return [];
+
+  const ds = getCurrentDataset();
+  const qq = normalize(q);
+
+  if (!qq) {
+    const all = Array.from(ds.nodes.keys()).sort((a, b) => a.localeCompare(b, "it"));
+    const LIMIT = 250;
+    const sliced = all.slice(0, LIMIT);
+    sliced._meta = { total: all.length, shown: sliced.length };
+    return sliced;
+  }
+
+  const out = [];
+  for (const name of ds.nodes.keys()) {
+    if (normalize(name).includes(qq)) out.push(name);
+    if (out.length >= 30) break;
+  }
+
+  return out;
+}
+
+function renderResults(items) {
+  const box = $("suggestions");
+  box.innerHTML = "";
+
+  if (!items || items.length === 0) {
+    box.style.display = "none";
+    return;
+  }
+
+  if (items._meta) {
+    const meta = document.createElement("div");
+    meta.style.fontSize = "12px";
+    meta.style.color = "#000";
+    meta.style.background = "rgba(189,149,84,0.85)";
+    meta.style.padding = "6px 10px";
+    meta.style.borderRadius = "6px";
+    meta.style.marginBottom = "8px";
+    meta.textContent = `Elenco nodi: mostro ${items._meta.shown} su ${items._meta.total}. Digita per filtrare.`;
+    box.appendChild(meta);
+  }
+
+  for (const name of items) {
+    const div = document.createElement("div");
+    div.className = "s-item";
+    div.textContent = name;
+    div.addEventListener("click", () => {
+      $("search").value = name;
+      box.style.display = "none";
+      focusNode(name);
+    });
+    box.appendChild(div);
+  }
+
+  box.style.display = "block";
+}
+
+$("search").addEventListener("input", (e) => {
+  const matches = searchNodes(e.target.value);
+  renderResults(matches);
+});
+
+$("search").addEventListener("focus", (e) => {
+  const matches = searchNodes(e.target.value);
+  renderResults(matches);
+});
+
+document.addEventListener("click", (e) => {
+  const box = $("suggestions");
+  const search = $("search");
+  if (e.target !== box && e.target !== search && !box.contains(e.target)) {
+    box.style.display = "none";
+  }
+});
+
+/* ======================
+   BUTTONS
+====================== */
+$("btn-soci").addEventListener("click", () => setDataset("soci"));
+$("btn-garanzie").addEventListener("click", () => setDataset("garanzie"));
+
+$("btn-reset").addEventListener("click", () => {
+  $("search").value = "";
+  renderResults([]);
+
+  appState.selectedEdge = null;
+  appState.selectedNodeName = null;
+  appState.selectedDocsPayload = null;
+  appState.hoveredNodeName = null;
+  currentAdjData = null;
+
+  updateEdgePanel(null);
+  updateNodePanel(null);
+  closeAdjModal();
+  closeDocsModal();
+  hideHoverLabel();
+
+  if (appState.ready) {
+    const ds = getCurrentDataset();
+    const top30 = getTopNNodes(ds, 30);
+    appState.visibleNodeNames = new Set(top30.map(n => n.name));
+  }
+
+  resetView();
+  drawNodes();
+  hud.textContent = `${LABELS[appState.datasetKey]}: reset vista`;
+});
+
+$("btn-docs").addEventListener("click", () => {
+  if (appState.selectedEdge) {
+    openDocsModal(buildDocsPayloadFromEdge(appState.selectedEdge));
+    return;
+  }
+
+  if (appState.selectedNodeName) {
+    openDocsModal(buildDocsPayloadFromNode(appState.selectedNodeName));
+    return;
+  }
+
+  hud.textContent = "Seleziona prima un nodo o un arco.";
+});
+
+$("btn-adj").addEventListener("click", () => {
+  if (!appState.selectedNodeName) {
+    hud.textContent = "Seleziona prima un nodo.";
+    return;
+  }
+
+  currentAdjData = buildLocalAdjacencyData(appState.selectedNodeName);
+  renderAdjacencyTable(currentAdjData);
+  openAdjModal();
+});
+
+adjDownloadBtn.addEventListener("click", () => {
+  if (currentAdjData) {
+    downloadAdjacencyCSV(currentAdjData);
+  }
+});
+
+adjCloseBtn.addEventListener("click", closeAdjModal);
+adjModal.querySelector(".adj-backdrop").addEventListener("click", closeAdjModal);
+
+docsDownloadBtn.addEventListener("click", () => {
+  if (appState.selectedDocsPayload) {
+    downloadDocsCSV(appState.selectedDocsPayload);
+  }
+});
+
+docsCloseBtn.addEventListener("click", closeDocsModal);
+docsModal.querySelector(".docs-backdrop").addEventListener("click", closeDocsModal);
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    if (!adjModal.classList.contains("hidden")) closeAdjModal();
+    if (!docsModal.classList.contains("hidden")) closeDocsModal();
+  }
+});
+
+/* ======================
+   BOOT
+====================== */
+async function boot() {
+  resizeCanvas();
+  setActiveDatasetButton();
+  updateEdgePanel(null);
+  updateNodePanel(null);
+  updateStats();
+
+  await loadAllEdgeDatasets();
+
+  updateStats();
+  setDataset("soci");
+
+  hud.textContent = "Pronto.";
+}
+
+boot().catch((err) => {
+  console.error(err);
+  hud.textContent = "Errore caricamento JSON. Apri via server locale e verifica i nomi file.";
+});
+  </script>
+</body>
+</html>

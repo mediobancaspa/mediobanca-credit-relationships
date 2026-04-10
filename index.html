@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mediobanca Credit Network Visualization</title>
+  <meta name="description" content="Visualizzazione interattiva delle relazioni tra soci e garanti nei dati creditizi Mediobanca." />
+
+  <style>
+    :root{
+      --bg: #0b0b0b;
+      --panel: #121212;
+      --panel-2: #171717;
+      --text: #f5f5f5;
+      --muted: #bdbdbd;
+      --muted-2: #9a9a9a;
+      --gold: #bd9554;
+      --gold-soft: rgba(189,149,84,0.14);
+      --border: rgba(255,255,255,0.08);
+      --maxw: 1180px;
+      --shadow: 0 16px 40px rgba(0,0,0,0.28);
+    }
+
+    *{ box-sizing: border-box; }
+
+    html, body{
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Century Gothic", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      line-height: 1.55;
+    }
+
+    a{
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container{
+      width: min(var(--maxw), calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .site-header{
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(12px);
+      background: rgba(11,11,11,0.88);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .site-header-inner{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      min-height: 74px;
+    }
+
+    .brand{
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-title{
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text);
+    }
+
+    .brand-subtitle{
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    .nav{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav a{
+      font-size: 14px;
+      color: var(--muted);
+      padding: 10px 12px;
+      border-radius: 8px;
+      transition: 0.2s ease;
+    }
+
+    .nav a:hover{
+      color: var(--text);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .nav .nav-cta{
+      color: #000;
+      background: var(--gold);
+      font-weight: 700;
+    }
+
+    .nav .nav-cta:hover{
+      background: #d2ab68;
+    }
+
+    .hero{
+      padding: 88px 0 56px 0;
+      background:
+        radial-gradient(circle at top left, rgba(189,149,84,0.10), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(189,149,84,0.07), transparent 28%);
+    }
+
+    .hero-grid{
+      display: grid;
+      grid-template-columns: 1.35fr 0.85fr;
+      gap: 28px;
+      align-items: stretch;
+    }
+
+    .hero-copy{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 38px;
+      box-shadow: var(--shadow);
+    }
+
+    h1{
+      margin: 0 0 16px 0;
+      font-size: clamp(34px, 5vw, 60px);
+      line-height: 1.04;
+      letter-spacing: -0.03em;
+    }
+
+    .hero-technical{
+      margin: 0 0 22px 0;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--gold);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .hero-copy p{
+      margin: 0 0 16px 0;
+      font-size: 17px;
+      color: var(--muted);
+      max-width: 760px;
+    }
+
+    .hero-actions{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 28px;
+    }
+
+    .btn{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 18px;
+      border-radius: 10px;
+      border: 1px solid var(--gold);
+      font-weight: 700;
+      transition: 0.2s ease;
+    }
+
+    .btn-primary{
+      background: var(--gold);
+      color: #000;
+    }
+
+    .btn-primary:hover{
+      background: #d2ab68;
+    }
+
+    .btn-secondary{
+      background: transparent;
+      color: var(--text);
+    }
+
+    .btn-secondary:hover{
+      background: var(--gold-soft);
+    }
+
+    .hero-panel{
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background: var(--panel);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: var(--shadow);
+    }
+
+    .hero-panel h2{
+      margin: 0 0 14px 0;
+      font-size: 18px;
+      color: var(--gold);
+      letter-spacing: -0.01em;
+    }
+
+    .hero-panel p{
+      margin: 0 0 12px 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .meta-list{
+      display: grid;
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .meta-item{
+      padding: 15px 16px;
+      border-radius: 12px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+    }
+
+    .meta-item strong{
+      display: block;
+      margin-bottom: 4px;
+      font-size: 12px;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+    }
+
+    .meta-item span{
+      font-size: 15px;
+      color: var(--text);
+    }
+
+    section{
+      padding: 34px 0 42px 0;
+    }
+
+    .section-title{
+      margin: 0 0 14px 0;
+      font-size: 30px;
+      letter-spacing: -0.02em;
+    }
+
+    .section-intro{
+      max-width: 900px;
+      color: var(--muted);
+      margin: 0 0 28px 0;
+      font-size: 17px;
+    }
+
+    .stack-sections{
+      display: grid;
+      gap: 22px;
+    }
+
+    .feature-block{
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 26px;
+      align-items: stretch;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .feature-side{
+      background:
+        linear-gradient(180deg, rgba(189,149,84,0.16), rgba(189,149,84,0.04));
+      padding: 26px 24px;
+      border-right: 1px solid rgba(189,149,84,0.18);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .feature-kicker{
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.10em;
+      color: var(--gold);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .feature-side h3{
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    .feature-content{
+      padding: 26px 28px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .feature-row{
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .feature-row:last-child{
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .feature-row strong{
+      display: block;
+      margin-bottom: 6px;
+      font-size: 15px;
+      color: var(--text);
+    }
+
+    .feature-row p{
+      margin: 0;
+      font-size: 15px;
+      color: var(--muted);
+    }
+
+    .method-grid{
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .method-step{
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+    }
+
+    .step-num{
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--gold-soft);
+      color: var(--gold);
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .method-step h3{
+      margin: 0 0 10px 0;
+      font-size: 17px;
+    }
+
+    .method-step p{
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .cta-band{
+      margin: 24px 0 6px 0;
+      padding: 30px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(189,149,84,0.14), rgba(189,149,84,0.06));
+      border: 1px solid rgba(189,149,84,0.28);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+      box-shadow: var(--shadow);
+    }
+
+    .cta-band h2{
+      margin: 0 0 8px 0;
+      font-size: 26px;
+      letter-spacing: -0.02em;
+    }
+
+    .cta-band p{
+      margin: 0;
+      color: var(--muted);
+      max-width: 780px;
+    }
+
+    .site-footer{
+      padding: 26px 0 40px 0;
+      border-top: 1px solid var(--border);
+      color: var(--muted-2);
+      font-size: 14px;
+    }
+
+    .site-footer p{
+      margin: 6px 0;
+    }
+
+    @media (max-width: 1080px){
+      .hero-grid,
+      .method-grid{
+        grid-template-columns: 1fr;
+      }
+
+      .feature-block{
+        grid-template-columns: 1fr;
+      }
+
+      .feature-side{
+        border-right: none;
+        border-bottom: 1px solid rgba(189,149,84,0.18);
+      }
+    }
+
+    @media (max-width: 760px){
+      .site-header-inner{
+        align-items: flex-start;
+        padding: 14px 0;
+        flex-direction: column;
+      }
+
+      .hero{
+        padding-top: 54px;
+      }
+
+      .hero-copy,
+      .hero-panel,
+      .feature-side,
+      .feature-content,
+      .method-step{
+        padding: 20px;
+      }
+
+      .hero-copy p,
+      .section-intro{
+        font-size: 16px;
+      }
+
+      .brand-title{
+        font-size: 18px;
+      }
+
+      .nav{
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container site-header-inner">
+      <div class="brand">
+        <span class="brand-title">Mediobanca Credit Network Visualization</span>
+        <span class="brand-subtitle">Network analysis · archival data · interactive interface</span>
+      </div>
+
+      <nav class="nav">
+        <a href="#progetto">Progetto</a>
+        <a href="#funzioni">Funzioni</a>
+        <a href="#metodologia">Metodologia</a>
+        <a class="nav-cta" href="./arc_diagram.html">Apri il grafo</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="progetto">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <h1>Relazioni tra soci e garanti nei dati creditizi Mediobanca</h1>
+
+          <p class="hero-technical">
+            Environment for the exploration of reconstructed entity-to-entity links derived from archival credit records
+          </p>
+
+          <p>
+            Il progetto presenta un ambiente web dedicato all’esplorazione di relazioni ricostruite tra soggetti economici, persone e imprese a partire dalla documentazione creditizia conservata negli archivi Mediobanca.
+          </p>
+          <p>
+            La visualizzazione ad arc diagram consente di analizzare in modo compatto e leggibile i legami di partecipazione societaria e di garanzia, mettendo in relazione struttura della rete, frequenza documentaria e identificativi archivistici.
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="./arc_diagram.html">Esplora il grafo</a>
+            <a class="btn btn-secondary" href="https://github.com/mediobancaspa/mediobanca-credit-relationships">Vai al repository</a>
+          </div>
+        </div>
+
+        <aside class="hero-panel">
+          <div>
+            <h2>Panoramica tecnica</h2>
+            <p>
+              L’applicazione utilizza dataset JSON ricostruiti per le relazioni di tipo soci e garanzie, caricati direttamente nell’interfaccia web e resi navigabili in ambiente statico.
+            </p>
+            <p>
+              La pipeline Python elabora il CSV sorgente, individua i ruoli delle entità, costruisce archi direzionali cliente → socio e cliente → garante e produce report di validazione del processo di rebuild.
+            </p>
+          </div>
+
+          <div class="meta-list">
+            <div class="meta-item">
+              <strong>Interfaccia</strong>
+              <span>Viewer HTML statico compatibile con GitHub Pages.</span>
+            </div>
+            <div class="meta-item">
+              <strong>Dataset</strong>
+              <span>Relazioni tra soggetti con identificativi IdxDams e riferimenti documentari.</span>
+            </div>
+            <div class="meta-item">
+              <strong>Pipeline</strong>
+              <span>Ricostruzione, arricchimento e controllo degli archi relazionali.</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="funzioni">
+      <div class="container">
+        <h2 class="section-title">Funzioni principali</h2>
+        <p class="section-intro">
+          La piattaforma è progettata per sostenere sia la consultazione esplorativa sia la lettura critica delle relazioni documentate, mantenendo il collegamento tra visualizzazione, struttura dei dati e base archivistica.
+        </p>
+
+        <div class="stack-sections">
+          <article class="feature-block">
+            <div class="feature-side">
+              <div class="feature-kicker">Exploration</div>
+              <h3>Lettura della rete</h3>
+            </div>
+            <div class="feature-content">
+              <div class="feature-row">
+                <strong>Esplorazione dei soggetti</strong>
+                <p>
+                  Navigazione tra imprese, persone e altri attori presenti nella documentazione, con accesso immediato ai nodi collegati e alle rispettive relazioni.
+                </p>
+              </div>
+              <div class="feature-row">
+                <strong>Confronto tra tipologie di legame</strong>
+                <p>
+                  Distinzione tra relazioni di partecipazione e relazioni di garanzia, così da leggere la rete come una struttura documentaria articolata su più livelli.
+                </p>
+              </div>
+              <div class="feature-row">
+                <strong>Supporto all’analisi visiva</strong>
+                <p>
+                  L’arc diagram rende più leggibile la distribuzione dei legami e permette di individuare rapidamente concentrazioni, ricorrenze e configurazioni relazionali.
+                </p>
+              </div>
+            </div>
+          </article>
+
+          <article class="feature-block">
+            <div class="feature-side">
+              <div class="feature-kicker">Documentation</div>
+              <h3>Tracciabilità dei dati</h3>
+            </div>
+            <div class="feature-content">
+              <div class="feature-row">
+                <strong>Risalita ai riferimenti documentari</strong>
+                <p>
+                  Ogni relazione può essere ricondotta ai documenti che la attestano, mantenendo il nesso tra visualizzazione e base archivistica.
+                </p>
+              </div>
+              <div class="feature-row">
+                <strong>Presenza di identificativi archivistici</strong>
+                <p>
+                  I dataset includono gli identificativi IdxDams associati a source e target, favorendo controllo, riuso e interoperabilità.
+                </p>
+              </div>
+              <div class="feature-row">
+                <strong>Coerenza con la pipeline di rebuild</strong>
+                <p>
+                  La visualizzazione si appoggia a una catena di trasformazione documentata, verificabile tramite script e report di ricostruzione.
+                </p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="metodologia">
+      <div class="container">
+        <h2 class="section-title">Metodologia</h2>
+        <p class="section-intro">
+          Il progetto integra acquisizione dei dati, modellazione dei ruoli, ricostruzione relazionale e pubblicazione web in un workflow orientato alla consultazione online e alla verificabilità del dato.
+        </p>
+
+        <div class="method-grid">
+          <article class="method-step">
+            <div class="step-num">1</div>
+            <h3>Acquisizione</h3>
+            <p>
+              Il CSV sorgente costituisce la base di partenza per l’identificazione delle entità e dei ruoli presenti nei fascicoli.
+            </p>
+          </article>
+
+          <article class="method-step">
+            <div class="step-num">2</div>
+            <h3>Ricostruzione</h3>
+            <p>
+              Gli script producono archi direzionali cliente → socio e cliente → garante, aggregando pesi, documenti e identificativi.
+            </p>
+          </article>
+
+          <article class="method-step">
+            <div class="step-num">3</div>
+            <h3>Validazione</h3>
+            <p>
+              I report misurano copertura, riuso degli ID, nuovi nodi ed esito del rebuild per entrambe le classi di relazione.
+            </p>
+          </article>
+
+          <article class="method-step">
+            <div class="step-num">4</div>
+            <h3>Pubblicazione</h3>
+            <p>
+              I JSON finali sono caricati dall’interfaccia HTML in un ambiente statico compatibile con GitHub Pages.
+            </p>
+          </article>
+        </div>
+
+        <div class="cta-band">
+          <div>
+            <h2>Accedi alla visualizzazione</h2>
+            <p>
+              Apri l’arc diagram per esplorare la rete delle relazioni tra soci e garanti nei crediti concessi.
+            </p>
+          </div>
+          <a class="btn btn-primary" href="./arc_diagram.html">Apri il grafo interattivo</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p><strong>Mediobanca Credit Network Visualization</strong></p>
+      <p>Progetto di visualizzazione e analisi di relazioni archivistiche basato su pipeline Python, dataset JSON ricostruiti e interfaccia web statica.</p>
+    </div>
+  </footer>
+
+</body>
+</html>
