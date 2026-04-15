@@ -127,33 +127,48 @@ The final output consists of enriched JSON files used directly by the visualizat
 
 ## Repository structure
 
-```text
-data/
-  raw/        # source CSV dataset
-  graph/      # processed graph datasets (JSON)
-  reports/    # validation and rebuild reports
-
-scripts/      # data processing pipeline (Python)
-
-index.html            # project homepage
-arc_diagram.html      # interactive visualization
 ```
+assets/
+  img/                # static images used in the interface
+
+data/
+  raw/                # source CSV dataset
+  graph/              # graph datasets (intermediate and final JSON)
+  reports/            # validation and rebuild reports
+
+docs/                 # documentation
+
+scripts/              # data processing pipeline (Python)
+  json_maker.py       # extraction from general graph
+  New_Json.py         # reconstruction and alignment with CSV
+  Enrich_json.py      # enrichment with document references
+
+index.html            # project entry point (GitHub Pages)
+arc-diagram.html      # interactive arc diagram visualization
+
+README.md             # project documentation
+LICENSE               # license information
+```
+
+The `data/graph/` directory includes both intermediate datasets extracted from the general network and final rebuilt datasets used in the visualization.
 
 ---
 
 ## Visualization
 
-The network is visualized through a static HTML interface compatible with GitHub Pages.
+The network is visualized through a static HTML interface designed for deployment via GitHub Pages.
+
+The visualization adopts an arc diagram layout, where entities are arranged along a linear axis and relationships are represented as curved links. This configuration enables a compact and readable representation of dense relational structures, particularly suited for highlighting recurring connections and overlaps.
 
 Main features:
 
-- arc diagram layout for compact representation of relationships
-- distinction between shareholder and guarantee links
-- interactive exploration of nodes and connections
-- access to document references associated with each relation
+- separation of relationship types, allowing users to explore shareholder (soci) and guarantee (garanzie) networks independently  
+- interactive node selection, with dynamic highlighting of connected edges  
+- inspection of individual relationships, including associated archival identifiers (IdxDams)  
+- access to document-level references linked to each edge  
+- visual encoding of relational intensity through edge aggregation  
 
-The visualization layer operates entirely client-side and does not require a backend.
-
+The interface is implemented as a fully client-side application, requiring no backend infrastructure and ensuring portability and ease of deployment.
 ---
 
 ## How to use
@@ -178,42 +193,23 @@ No server or additional dependencies are required.
 
 ## Reproducibility
 
-To regenerate the graph from the source data:
+The data processing pipeline is tailored to the structure and conventions of the Mediobanca archival dataset.
 
-1. Place the CSV file in:
+While the provided Python scripts allow the reconstruction of the graph from the original data, their direct reuse on different datasets is not guaranteed without adaptation.
 
-   ```text
-   data/raw/
-   ```
+In particular, the pipeline assumes:
 
-2. Run the processing pipeline:
+- a specific organization of entities and roles within the source CSV  
+- consistent formatting of entity names and relational fields  
+- the availability of a pre-existing general network in JSON format for alignment and identifier continuity  
 
-   ```bash
-   python scripts/json_maker.py
-   python scripts/New_Json.py
-   python scripts/Enrich_json.py
-   ```
+For datasets with different structures or conventions, adjustments may be required in order to:
 
-3. The resulting datasets will be available in:
+- correctly parse entities and roles  
+- redefine the logic used to extract and classify relationships  
+- adapt the reconstruction and aggregation procedures  
 
-   ```text
-   data/graph/
-   ```
-
----
-
-## Methodological notes
-
-The reconstruction process interprets structured archival records to derive relational networks.
-
-Key aspects:
-
-- roles are inferred from structured fields in the source data
-- relationships are modeled as directional
-- multiple documents contribute to the weight of each edge
-- the graph maintains a direct link to archival evidence
-
-The methodology aims to preserve traceability between visualization and source documentation.
+The current implementation should therefore be understood as a reproducible workflow within a well-defined data context, rather than a fully general-purpose pipeline.
 
 ---
 
