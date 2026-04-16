@@ -39,7 +39,7 @@ In this sense, the model serves both as an interpretative refinement of the orig
 
 Each node represents a unique economic actor involved in the reconstructed credit network.
 
-Nodes are not introduced independently from the relationships, but are derived from the edge datasets: every entity appearing as `source` or `target` in the reconstructed shareholder (*soci*) and guarantee (*garanzie*) relations is indexed as a node. In the processed structure, each node is associated with a stable textual form and, where available, with its archival identifier (`codice` / IdxDams). :contentReference[oaicite:2]{index=2}
+Nodes are not introduced independently from the relationships, but are derived from the edge datasets: every entity appearing as `source` or `target` in the reconstructed shareholder (*soci*) and guarantee (*garanzie*) relations is indexed as a node. In the processed structure, each node is associated with a stable textual form and, where available, with its archival identifier (`codice` / IdxDams).  
 
 ### Identity and normalization
 
@@ -51,7 +51,7 @@ This normalization is essential for three reasons:
 - it aligns the specialized graph with the broader Mediobanca Credit Network  
 - it ensures consistency between reconstructed edge datasets and node lookup functions in the interface  
 
-As a result, each node corresponds to a single stabilized representation of an actor within the network. :contentReference[oaicite:3]{index=3}
+As a result, each node corresponds to a single stabilized representation of an actor within the network.
 
 ### Node weight
 
@@ -78,15 +78,49 @@ The visibility model is then expanded through interaction. When a node is search
 This mechanism allows nodes outside the initial top 30 to appear dynamically when they become analytically relevant, without requiring the full graph to be displayed from the outset. 
 
 ---
-
 ## Edges
 
-Edges represent directed relationships between entities.
+Edges represent reconstructed relationships between entities derived from archival credit records.
+
+Each edge encodes a specific relational role identified during the data processing phase and is the result of an aggregation process applied to multiple source records.
+
+---
+
+### Generation of edges
+
+Edges are not directly present in the source data, but are reconstructed through a transformation pipeline.
+
+Starting from the structured CSV dataset (and aligned with the general network JSON), the process:
+
+- identifies entities involved in each credit record  
+- extracts their roles (e.g. client, shareholder, guarantor)  
+- reconstructs pairwise relationships between entities  
+
+For each relevant combination, a directed edge is created following the logic:
+
+- client → shareholder (*socio*)  
+- client → guarantor (*garante*)  
+
+This reconstruction ensures that relationships are consistently modeled across the dataset and aligned with the broader network structure.
+
+---
 
 ### Directionality
 
-- client → shareholder (socio)  
-- client → guarantor (garante)  
+Edges are directed, but direction does not encode a fixed semantic hierarchy (e.g. “client → shareholder”).
+
+Instead:
+
+- direction reflects the reconstruction of relationships from source records  
+- nodes are not assigned a fixed role across the network  
+- the same entity can appear both as source and target across different relationships  
+
+The nature of the relationship is determined by the dataset:
+
+- edges from the *soci* dataset represent shareholder relationships  
+- edges from the *garanzie* dataset represent guarantee relationships  
+
+This distinction is preserved in the visualization by separating arcs above and below the axis, rather than by assigning fixed roles to nodes.
 
 ---
 
@@ -104,29 +138,57 @@ Edges represent directed relationships between entities.
 
 ### Description
 
-- **source / target**: entities involved in the relationship  
-- **weight**: number of occurrences across archival records  
-- **documents**: supporting archival references  
-- **idxdams**: unique identifiers linked to archival records  
+- **source / target**  
+  Normalized entities involved in the relationship, aligned with the node set.
+
+- **weight**  
+  The weight of an edge is defined as the number of occurrences of the same relationship across archival records.
+
+  During processing:
+  
+  - identical relationships (same source and target) are merged  
+  - each occurrence contributes to the cumulative weight  
+  - the final weight represents the **intensity or frequency** of the relationship  
+
+- **documents**  
+  Collection of archival references supporting the existence of the relationship.
+
+  These are aggregated across all contributing records and preserve the link to the original sources.
+
+- **idxdams**  
+  Set of unique archival identifiers associated with the relationship.
+
+  During aggregation:
+  
+  - identifiers are deduplicated  
+  - all distinct references are retained  
+
+  This ensures traceability between the reconstructed edge and the underlying archival material.
 
 ---
 
-## Aggregation
+### Aggregation logic
 
-Relationships are aggregated:
+A key property of the model is that edges are **aggregated representations**.
 
-- repeated edges are merged  
-- weights are summed  
-- documents are combined  
-- identifiers are deduplicated  
+This means that:
+
+- multiple archival records can contribute to a single edge  
+- relationships are not duplicated, but consolidated  
+- all associated information (weight, documents, identifiers) is accumulated  
+
+As a result, each edge captures the **global strength and documentary support** of a relationship between two entities.
 
 ---
 
-## Dataset structure
+### Relationship scope
 
-The model is implemented through separate datasets:
+Edges represent only specific types of relationships:
 
-- soci (shareholder relationships)  
-- garanzie (guarantee relationships)  
+- shareholder (*soci*)  
+- guarantee (*garanzie*)  
 
-These share the same node space but represent different relational semantics.
+These are extracted as a specialization of a broader relational network and should be interpreted within this scope.
+
+Other types of relationships present in the general network are not included in this representation.
+
