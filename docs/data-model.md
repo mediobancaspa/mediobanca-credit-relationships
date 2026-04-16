@@ -21,31 +21,61 @@ The resulting network is therefore not an independent graph, but a typed and spe
 
 In this sense, the model serves both as an interpretative refinement of the original network and as a dedicated environment for exploring the role of shareholders and guarantors in the relational structure emerging from archival credit records.
 
+---
+
 ## Relationship to the general network
 
-![General network](../assets/img/general-network-preview.png)
+![General Mediobanca Credit Network](../assets/img/network-preview.png)
 
 *Figure 1. General relational network derived from the Mediobanca historical archive.*
 
-![Specialized soci-garanzie network](../assets/img/arc-diagram-preview.png)
+![Arc diagram of shareholder and guarantee relationships](../assets/img/arc-diagram-preview.png)
 
-*Figure 2. Specialized network focused on shareholder and guarantee relationships.*
+*Figure 2. Specialized network focused on shareholder (*soci*) and guarantee (*garanzie*) relationships.*
 
 ---
 
 ## Nodes
 
-Each node represents a unique entity involved in credit operations.
+Each node represents a unique economic actor involved in the reconstructed credit network.
+
+Nodes are not introduced independently from the relationships, but are derived from the edge datasets: every entity appearing as `source` or `target` in the reconstructed shareholder (*soci*) and guarantee (*garanzie*) relations is indexed as a node. In the processed structure, each node is associated with a stable textual form and, where available, with its archival identifier (`codice` / IdxDams). :contentReference[oaicite:2]{index=2}
 
 ### Identity and normalization
 
-Nodes are identified by their normalized name (*forma autorizzata*), ensuring consistency across datasets and alignment with the general network.
+Nodes are identified by their normalized name, corresponding to the *forma autorizzata* used during data processing and preserved in the visualization layer.
+
+This normalization is essential for three reasons:
+
+- it prevents the same entity from appearing multiple times under slightly different textual forms  
+- it aligns the specialized graph with the broader Mediobanca Credit Network  
+- it ensures consistency between reconstructed edge datasets and node lookup functions in the interface  
+
+As a result, each node corresponds to a single stabilized representation of an actor within the network. :contentReference[oaicite:3]{index=3}
 
 ### Node weight
 
-Nodes carry an implicit weight defined as the number of incoming relationships.
+Each node carries an importance value computed directly from the reconstructed edges.
 
-This value is used in the visualization layer to determine node size.
+In the current implementation, node importance is calculated as the cumulative sum of the weights of all incident edges. This means that, whenever an entity appears as either `source` or `target`, the weight of that relationship contributes to its score. The node therefore acquires importance through the total intensity of its participation in the network, rather than through a simple binary count of links. 
+
+### Node size
+
+The node importance value is used in the visualization layer to determine node size.
+
+During rendering, node radius is scaled between a minimum and a maximum value on the basis of the node's relative score within the visible set. Larger nodes therefore correspond to entities with higher accumulated relational importance, while smaller nodes indicate actors involved in fewer or weaker reconstructed relations. 
+
+### Initial visibility and node retrieval
+
+At dataset initialization, the interface does not render the full node set immediately. Instead, it computes the ranking of nodes by importance and displays only the top 30 entities for the active dataset. This choice reduces visual overload and provides a readable first view centred on the most structurally relevant actors. 
+
+The visibility model is then expanded through interaction. When a node is searched or selected, the system:
+
+- adds the selected node to the visible set  
+- retrieves all incident edges connected to that node  
+- adds the corresponding neighboring nodes linked through those edges  
+
+This mechanism allows nodes outside the initial top 30 to appear dynamically when they become analytically relevant, without requiring the full graph to be displayed from the outset. 
 
 ---
 
