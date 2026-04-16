@@ -6,9 +6,30 @@ This document defines the structural data model underlying the Mediobanca Credit
 
 ## Overview
 
-The network is modeled as a directed graph where nodes represent economic actors and edges represent reconstructed relationships derived from archival credit records.
+The network documented here should be understood as a specialization of a broader relational graph derived from the Mediobanca historical archive and published in the companion repository:
 
-The graph is a specialized projection of a broader relational network and focuses on qualifying the nature of relationships between entities.
+https://github.com/mediobancaspa/Mediobanca-Credit-Network
+
+Within that broader model, connections between entities are represented as part of a general relational structure. The present graph is conceived as an extension and analytical specification of that network, designed to make explicit the nature of the links connecting entities.
+
+More specifically, its purpose is to reconstruct and visualize two classes of relationships that are not explicitly distinguished in the general graph:
+
+- shareholder relationships (*soci*)
+- guarantee relationships (*garanzie*)
+
+The resulting network is therefore not an independent graph, but a typed and specialized projection of the broader Mediobanca Credit Network. Its analytical value lies in qualifying relational ties that, in the general graph, remain structurally visible but semantically undifferentiated.
+
+In this sense, the model serves both as an interpretative refinement of the original network and as a dedicated environment for exploring the role of shareholders and guarantors in the relational structure emerging from archival credit records.
+
+## Relationship to the general network
+
+![General network](../assets/img/general-network-preview.png)
+
+*Figure 1. General relational network derived from the Mediobanca historical archive.*
+
+![Specialized soci-garanzie network](../assets/img/arc-diagram-preview.png)
+
+*Figure 2. Specialized network focused on shareholder and guarantee relationships.*
 
 ---
 
